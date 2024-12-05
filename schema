@@ -2,7 +2,7 @@ Table Citizens {
   Id varchar(450) [pk]
   Profilepic varbinary(max)
   LastName varchar
-  Gender Gender 
+  Gender Gender
   Pincode int
   Mandal varchar
   District varchar
@@ -23,6 +23,7 @@ Table Citizens {
   LockoutEnabled boolean
   AccessFailedCount int
 }
+
 Enum Gender {
   Male
   Female
@@ -36,80 +37,82 @@ Table AspNetRoles {
 }
 
 Table AspNetUserRoles {
-  UserId varchar(450) [pk]
-  RoleId varchar(450) [pk]
+  UserId varchar(450) [ref: <> Citizens.Id]
+  RoleId varchar(450) [note: "Foreign Key AspNetRoles(Id)"]
 }
 
-Ref: AspNetUserRoles.UserId > Citizens.Id
-Ref: AspNetUserRoles.RoleId > AspNetRoles.Id
-
 Table Department {
-  DeptId int [pk]      // Primary Key
-  DeptName varchar     // Department Name
-  Description varchar  // Department Description
+  DeptId int [pk]
+  DeptName varchar
+  Description varchar
+}
+
+Table PoliceOfficer {
+  OfficerId nvarchar(450) [pk, ref: > Citizens.Id]
+  OfficerDesignation varchar(100)
+  SuperiorId nvarchar(450) [ref: <> PoliceOfficer.OfficerId, null]
+  DepartmentId int [ref: > Department.DeptId]
 }
 
 Table Service {
-  ServiceId int [pk]   // Primary Key
-  ServiceName varchar  // Name of the service
-  DeptId int           // Foreign Key to Department
-  DocsRequires varchar // Documents required for the service
-  ProcessingTime int  // Processing time in days (nullable)
-  GovFee decimal       // Government Fee
-  ServiceFee decimal   // Service Fee
-  Tax decimal          // Tax Amount
-
+  ServiceId int [pk]
+  ServiceName varchar
+  DeptId int [ref: > Department.DeptId]
+  DocsRequires varchar
+  ProcessingTime int
+  GovFee decimal
+  ServiceFee decimal
+  Tax decimal
 }
- Ref: Service.DeptId > Department.DeptId
-Table PoliceOfficer {
-  OfficerId nvarchar(450) [pk]  // Primary Key and Foreign Key to Citizen
-  OfficerDesignation varchar(100)    // Officer's Designation
-  SuperiorId nvarchar(450)  // Foreign Key to Superior (self-referencing)
-  DepartmentId int                  // Foreign Key to Department
-}
-Ref: PoliceOfficer.OfficerId > Citizens.Id
-Ref: PoliceOfficer.SuperiorId > PoliceOfficer.OfficerId // Self-referencing relationship for Superior
-Ref: PoliceOfficer.DepartmentId > Department.DeptId     // Foreign Key to Department
 
 Table ServiceApplication {
   ApplicationID int [pk]
-  UserID varchar
-  ServiceID int
+  UserID varchar [ref: > Citizens.Id]
+  ServiceID int [ref: > Service.ServiceId]
   ServiceName varchar
   ApplicationDate datetime
   Status Status [default: "Pending"]
-  OfficerID int [null]
+  OfficerID int [ref: > PoliceOfficer.OfficerId, null]
 }
+
 Enum Status {
   Pending
   InProgress
   Completed
   Withdrawn
 }
-Ref: ServiceApplication.UserID > Citizens.Id
-Ref: ServiceApplication.ServiceID > Service.ServiceId
-Ref: ServiceApplication.OfficerID > PoliceOfficer.OfficerId
 
 Table Scheme {
-  SchemeID int [pk, increment]  // Auto-incrementing primary key
+  SchemeID int [pk]
   SchemeName varchar
   Details varchar
   Attributes varchar
-  Eligibility varchar
   ApplicationProcess varchar
   DocsRequired varchar
 }
 
-Table Grievances {
-  GrievanceID int [pk] // Primary Key
-  UserID varchar [ref: > Citizens.Id]
-  OfficerId varchar [ref: > PoliceOfficer.OfficerId] // Officer handling the grievance (Nullable, FK to PoliceOfficer)
-  DepartmentID int [ref: > Department.DeptId] // Foreign Key to Department
-  Title varchar(100) [not null] // Title of the grievance
-  Description text [not null] // Description of the grievance
-  FilesUploaded byte // File(s) uploaded (Nullable)
-  Status Status [default: "Pending"] // Grievance Status
-  CreatedAt datetime [default: "DateTime.Now()"] 
-  TimeLine String 
+Table Eligibility {
+  EligibilityId int [pk]
+  SchemeId int [ref: > Scheme.SchemeID]
+  Gender varchar [null]
+  Age int [null]
+  MinAge int [null]
+  MaxAge int [null]
+  Caste varchar [null]
+  IsDifferentlyAbled boolean [null]
+  IsStudent boolean [null]
+  IsBPL boolean [null]
 }
 
+Table Grievances {
+  GrievanceID int [pk]
+  UserID varchar [ref: > Citizens.Id]
+  OfficerId varchar [ref: > PoliceOfficer.OfficerId, null]
+  DepartmentID int [ref: > Department.DeptId]
+  Title varchar(100)
+  Description text
+  FilesUploaded byte [null]
+  Status Status [default: "Pending"]
+  CreatedAt datetime [default: "DateTime.Now()"]
+  TimeLine String
+}
