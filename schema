@@ -37,8 +37,8 @@ Table AspNetRoles {
 }
 
 Table AspNetUserRoles {
-  UserId varchar(450) [ref: <> Citizens.Id]
-  RoleId varchar(450) [note: "Foreign Key AspNetRoles(Id)"]
+  UserId varchar(450) [ref: > Citizens.Id]
+  RoleId varchar(450) [ref: > AspNetRoles.Id]
 }
 
 Table Department {
@@ -48,9 +48,9 @@ Table Department {
 }
 
 Table PoliceOfficer {
-  OfficerId nvarchar(450) [pk, ref: > Citizens.Id]
+  OfficerId nvarchar(450) [pk, note: "One to One relationship to Citizens.Id"]
   OfficerDesignation varchar(100)
-  SuperiorId nvarchar(450) [ref: <> PoliceOfficer.OfficerId, null]
+  SuperiorId nvarchar(450) [ref: > PoliceOfficer.OfficerId, null]
   DepartmentId int [ref: > Department.DeptId]
 }
 
@@ -93,7 +93,7 @@ Table Scheme {
 
 Table Eligibility {
   EligibilityId int [pk]
-  SchemeId int [ref: > Scheme.SchemeID]
+  SchemeId int [note: "One to One relationship to Schemes.Id"]
   Gender varchar [null]
   Age int [null]
   MinAge int [null]
