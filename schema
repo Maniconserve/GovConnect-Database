@@ -111,8 +111,13 @@ Table Grievances {
   DepartmentID int [ref: > Department.DeptId]
   Title varchar(100)
   Description text
-  FilesUploaded byte [null]
   Status Status [default: "Pending"]
   CreatedAt datetime [default: "DateTime.Now()"]
   TimeLine String
+}
+Table GrievanceFiles {
+  FileID int [pk, increment] // Primary key with auto increment
+  GrievanceID int [ref: > Grievances.GrievanceID]
+  FileName varchar(255)
+  FileContent varbinary(max)
 }
